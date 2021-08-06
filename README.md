@@ -56,3 +56,10 @@ and modify the parameters and save changes by taping `ctrl x` and tape `y`:
   "temporary_directory": "/abs/path/to/<your option>",
   "params_tax_report_html": "--report-mode 1",
   "output_dir": "abs/path/to/your_option"
+
+ 
+ Activate environemnt and run the pipeline with the commands:
+        
+                conda activate MMSEQS2
+                snakemake -s snakefile_contigs_taxonomy --cores <your option>
+        
