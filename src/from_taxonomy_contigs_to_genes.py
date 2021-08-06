@@ -7,8 +7,8 @@ description = 'This program extracts the taxonomy annotation from contigs and as
 
 parser = argparse.ArgumentParser(description=description, usage=usage)
 parser.add_argument ('-i', metavar="contigs taxonomy annotation", dest= 'i', help='path to contigs taxonomy annotation file, e.g., GTDB_Uniprot90.tsv', required = True)
-parser.add_argument ('-g', metavar="representative gene or proteins from mix_assembly", dest= 'g', help='path to representative gene or protein file - mix_assembly, e.g., DB_clu_rep.fasta', required = True)
-parser.add_argument ('-t', metavar="output table name", dest= 't', help=' table containing the representative genes and its taxonomy, e.g., mix_assembly_genes_taxonomy.tsv', required = True)
+parser.add_argument ('-g', metavar="representative gene or proteins", dest= 'g', help='path to representative gene or protein file, e.g., rep.fasta', required = True)
+parser.add_argument ('-t', metavar="output table name", dest= 't', help=' table containing the representative genes and its taxonomy, e.g., genes_taxonomy.tsv', required = True)
 
 args = parser.parse_args()
 
