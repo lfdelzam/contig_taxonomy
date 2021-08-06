@@ -1,19 +1,19 @@
 {
-  "workdir": "/crex/proj/snic2020-6-126/uppstore2017125/projects/barm_clust/mix_assembly/cluster/GTDB_annotation/mmseqs2_taxonomy",
+  "workdir": "/abs/path/to/contig_taxonomy",
   "threads": 20,	
-  "GTDB_dir": "/crex/proj/snic2020-6-126/uppstore2017125/projects/barm_clust/mix_assembly/cluster/GTDB_annotation/GTDB_aa_db/protein_faa_reps",
-  "bact_tsv": "/crex/proj/snic2020-6-126/uppstore2017125/projects/barm_clust/mix_assembly/cluster/GTDB_annotation/GTDB_aa_db/bac120_taxonomy.tsv",
-  "arch_tsv": "/crex/proj/snic2020-6-126/uppstore2017125/projects/barm_clust/mix_assembly/cluster/GTDB_annotation/GTDB_aa_db/ar122_taxonomy.tsv",
-  "database": "/crex/proj/snic2020-6-126/uppstore2017125/projects/barm_clust/mix_assembly/cluster/GTDB_annotation/mmseqs2_taxonomy/GTDB_fasta",
+  "GTDB_dir": "/abs/path/to/GTDB_aa_db/protein_faa_reps",
+  "bact_tsv": "/abs/path/to/GTDB_aa_db/bac120_taxonomy.tsv",
+  "arch_tsv": "/abs/path/to/GTDB_aa_db/ar122_taxonomy.tsv",
+  "database": "/abs/path/to/contig_taxonomy/GTDB_fasta",
   "DB_type": "uniprot",
   "uniprot_db_type": "UniRef90",
   "database_uniprot_name": "UniRef90",
   "DB_uniprot_option_name": "only_Virus",
   "DB_uniprot_option_parameter": "--taxon-list 10239",
-  "contigs": "/crex/proj/snic2020-6-126/uppstore2017125/projects/barm_clust/mix_assembly/cluster/repre_seqs/mix_assembly.contigs.fna",
+  "contigs": "/abs/path/to/contigs.fna",
   "mmseqs_taxonomy_params": "--orf-filter 0 --tax-lineage 1",
   "easy_taxo": "False",
-  "temporary_directory": "/crex/proj/snic2020-6-126/uppstore2017125/projects/barm_clust/mix_assembly/cluster/GTDB_annotation/mmseqs2_taxonomy/temporal_uniref90_Virus",
+  "temporary_directory": "/abs/path/to/<temporal_directory>",
   "params_tax_report_html": "--report-mode 1",
-  "output_dir": "/crex/proj/snic2020-6-126/uppstore2017125/projects/barm_clust/mix_assembly/cluster/GTDB_annotation/mmseqs2_taxonomy/Uniref90_Virus_taxonomyResultp"
+  "output_dir": "/abs/path/to/<output_directory>"
 }
