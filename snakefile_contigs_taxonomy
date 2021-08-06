@@ -1,0 +1,118 @@
+
+configfile: "./contigs_taxonomy_config.json"
+workdir: config["workdir"]
+
+output_name=os.path.basename(config["output_dir"])
+
+if config["easy_taxo"] == "True":
+      rule_all_files=os.path.join(config["output_dir"], output_name+ "_easy_tax_tophit_report")
+else:
+      rule_all_files=expand("{outdir}/{out}{exts}", outdir=config["output_dir"], out=output_name, exts=[".dbtype", ".tsv", "_report", "_report.html" ])
+
+rule all:
+      input: rule_all_files
+
+
+if config["DB_type"] == "gtdb":
+    DB_name=os.path.basename(config["database"])
+
+    rule DB_fasta:
+      input: d=config["GTDB_dir"], b=config["bact_tsv"], a=config["arch_tsv"]
+      output: config["database"]
+      shell:"python src/create_GTDB_fasta_db.py -d {input.d} -b {input.b} -a {input.a} -o {output}"
+
+    rule transformation:
+      input: config["database"]
+      output: expand("taxonomy/{files}.dmp", files=["delnodes","merged", "names", "nodes"]), "taxonomy/mapping"
+      params: config["workdir"]
+      shell: "bash src/build_name_dmp_node_dmp.sh {input} {params}"
+
+    rule createdb:
+      input: i=config["database"], a=expand("taxonomy/{files}.dmp", files=["delnodes","merged", "names", "nodes"]), b="taxonomy/mapping"
+      output: db=expand("mmseqs2DBs/{DB_name}/SeqDB", DB_name=DB_name), h=expand("mmseqs2DBs/{DB_name}/SeqDB_h", DB_name=DB_name)
+      shell: "mmseqs createdb {input.i} {output.db}"
+
+    rule taxdb:
+      input: expand("mmseqs2DBs/{DB_name}/SeqDB", DB_name=DB_name)
+      output: expand("mmseqs2DBs/{DB_name}/SeqDB_mapping", DB_name=DB_name), b=expand("mmseqs2DBs/{DB_name}/SeqDB_taxonomy", DB_name=DB_name)
+      params: config["temporary_directory"]
+      shell:"mmseqs createtaxdb {input} {params} --ncbi-tax-dump taxonomy/ --tax-mapping-file taxonomy/mapping"
+
+if config["DB_type"] == "uniprot":
+    DB_name=config["database_uniprot_name"]
+
+    rule download_create:
+      output: db=expand("mmseqs2DBs/{DB_name}/SeqDB", DB_name=DB_name),
+              h=expand("mmseqs2DBs/{DB_name}/SeqDB_h", DB_name=DB_name),
+              a=expand("mmseqs2DBs/{DB_name}/SeqDB_mapping", DB_name=DB_name),
+              b=expand("mmseqs2DBs/{DB_name}/SeqDB_taxonomy", DB_name=DB_name)
+      threads: config["threads"]
+      params: t=config["temporary_directory"], type=config["uniprot_db_type"]
+      shell: "mmseqs databases {params.type} {output.db} {params.t} --threads {threads}"
+
+    if config["DB_uniprot_option_name"] != "":
+        DB_name1=DB_name
+        DB_name=DB_name+"_"+config["DB_uniprot_option_name"]
+
+        rule filtre:
+          input:  db=expand("mmseqs2DBs/{DB_name1}/SeqDB", DB_name1=DB_name1),
+                  h=expand("mmseqs2DBs/{DB_name1}/SeqDB_h", DB_name1=DB_name1),
+                  a=expand("mmseqs2DBs/{DB_name1}/SeqDB_mapping", DB_name1=DB_name1),
+                  b=expand("mmseqs2DBs/{DB_name1}/SeqDB_taxonomy", DB_name1=DB_name1)
+          output: db=expand("mmseqs2DBs/{DB_name}/SeqDB", DB_name=DB_name),
+                  h=expand("mmseqs2DBs/{DB_name}/SeqDB_h", DB_name=DB_name),
+                  a=expand("mmseqs2DBs/{DB_name}/SeqDB_mapping", DB_name=DB_name),
+                  b=expand("mmseqs2DBs/{DB_name}/SeqDB_taxonomy", DB_name=DB_name)
+          threads: config["threads"]
+          params: p=config["DB_uniprot_option_parameter"], w=config["workdir"], s=config["workdir"]+"/mmseqs2DBs/",
+                  ai=DB_name1+"/SeqDB_mapping", ao=DB_name+"/",
+                  bi=DB_name1+"/SeqDB_taxonomy", bo=DB_name+"/"
+          shell: '''
+                    mmseqs filtertaxseqdb {input.db} {output.db} {params.p} --threads {threads}
+                    cd {params.s}
+                    cp -u --remove-destination {params.ai} {params.ao}
+                    cp -u --remove-destination {params.bi} {params.bo}
+                    cd {params.w}
+                 '''
+
+if config["easy_taxo"] == "True":
+
+    rule top_hit:
+      input: c=config["contigs"], db=expand("mmseqs2DBs/{DB_name}/SeqDB", DB_name=DB_name), a=expand("mmseqs2DBs/{DB_name}/SeqDB_mapping", DB_name=DB_name), b=expand("mmseqs2DBs/{DB_name}/SeqDB_taxonomy", DB_name=DB_name)
+      output: os.path.join(config["output_dir"], output_name+ "_easy_tax_tophit_report")
+      threads: config["threads"]
+      params: p=config["mmseqs_taxonomy_params"], t=config["temporary_directory"], o=os.path.join(config["output_dir"],output_name+"_easy_tax")
+      shell: "mmseqs easy-taxonomy {input.c} {input.db} {params.o} {params.t} {params.p} --threads {threads}"
+
+else:
+    rule query:
+      input: config["contigs"]
+      output: os.path.join("mmseqs2DBs", "queryDBs", os.path.basename(config["contigs"])+"_queryDB")
+      shell: "mmseqs createdb {input} {output}"
+
+    rule taxo_result:
+      input: c=os.path.join("mmseqs2DBs", "queryDBs", os.path.basename(config["contigs"])+"_queryDB"), db=expand("mmseqs2DBs/{DB_name}/SeqDB", DB_name=DB_name), a=expand("mmseqs2DBs/{DB_name}/SeqDB_mapping", DB_name=DB_name), b=expand("mmseqs2DBs/{DB_name}/SeqDB_taxonomy", DB_name=DB_name)
+      output: os.path.join(config["output_dir"], output_name+".dbtype")
+      threads: config["threads"]
+      params: p=config["mmseqs_taxonomy_params"], t=config["temporary_directory"], o=os.path.join(config["output_dir"],output_name)
+      shell: "mmseqs taxonomy {input.c} {input.db} {params.o} {params.t} {params.p} --threads {threads}"
+
+    rule tax_tsv:
+      input: c=os.path.join("mmseqs2DBs", "queryDBs", os.path.basename(config["contigs"])+"_queryDB"), t=os.path.join(config["output_dir"], output_name+".dbtype")
+      output: os.path.join(config["output_dir"], output_name+".tsv")
+      params: os.path.join(config["output_dir"], output_name)
+      shell: "mmseqs createtsv {input.c} {params} {output}"
+
+    rule report:
+      input: d=expand("mmseqs2DBs/{DB_name}/SeqDB", DB_name=DB_name), t=os.path.join(config["output_dir"], output_name+".dbtype")
+      output: os.path.join(config["output_dir"], output_name+"_report")
+      threads: config["threads"]
+      params: os.path.join(config["output_dir"], output_name)
+      shell:"mmseqs taxonomyreport {input.d} {params} {output} --threads {threads}"
+
+    rule html:
+      input: d=expand("mmseqs2DBs/{DB_name}/SeqDB", DB_name=DB_name), r=os.path.join(config["output_dir"], output_name+".dbtype")
+      output: os.path.join(config["output_dir"], output_name+"_report.html")
+      threads: config["threads"]
+      params: p=config["params_tax_report_html"], i=os.path.join(config["output_dir"], output_name)
+      shell: "mmseqs taxonomyreport {input.d} {params.i} {output} {params.p} --threads {threads}"
