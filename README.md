@@ -50,7 +50,7 @@ and modify the parameters and save changes by taping `ctrl x` and tape `y`:
           "DB_uniprot_option_name": "your selection", -- used when a subset of uniprot DB is used, e.g., "only_Virus", "Only_Euka"
           "DB_uniprot_option_parameter": "your selection", -- used when a subset of uniprot DB is used, e.g., "--taxon-list 2759" when using only Eukaryotic sequences
           "contigs": "/abs/path/to/contigs.fna",
-          "mmseqs_taxonomy_params": "your options", e.g, "--orf-filter 0 --tax-lineage 1" when using Uniprot, or "--blacklist "" --orf-filter 0 --tax-lineage 1 --tax-lineage 1" when using GTDB, 
+          "mmseqs_taxonomy_params": "your options", e.g, "--orf-filter 0 --tax-lineage 1" when using Uniprot, or "--blacklist '' --orf-filter 0 --tax-lineage 1 --tax-lineage 1" when using GTDB, 
           "easy_taxo":"False",
           "temporary_directory": "/abs/path/to/<your option>",
           "params_tax_report_html": "--report-mode 1",
