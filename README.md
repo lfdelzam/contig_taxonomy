@@ -27,6 +27,7 @@ To download GTDB use the following commands::
         cd GTDB_aa_db/
         wget https://data.gtdb.ecogenomic.org/releases/latest/genomic_files_reps/gtdb_proteins_aa_reps.tar.gz
         wget -A _taxonomy.tsv -r -l 1 -nd https://data.gtdb.ecogenomic.org/releases/latest/
+        tar -xf gtdb_proteins_aa_reps.tar.gz
         cd ..
 
 ## Usage ##
